@@ -1,0 +1,61 @@
+.root {
+    -fx-font-family: "Segoe UI", "System", sans-serif;
+}
+
+.tab-pane {
+    -fx-tab-min-width: 120px;
+    -fx-tab-max-height: 35px;
+}
+
+.tab {
+    -fx-background-color: #f0f0f0;
+    -fx-padding: 5 10 5 10;
+}
+
+.tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #2196F3;
+    -fx-border-width: 0 0 2 0;
+}
+
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-font-size: 12px;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #e0e0e0;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 5;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #d0d0d0;
+}
+
+.text-field, .combo-box, .spinner {
+    -fx-background-radius: 5;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+    -fx-padding: 3 5;
+}
+
+.text-area {
+    -fx-font-family: monospace;
+    -fx-font-size: 12px;
+}
+
+.status-label {
+    -fx-text-fill: #666;
+    -fx-font-size: 11px;
+}
