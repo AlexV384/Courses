@@ -10,12 +10,13 @@
     <packaging>jar</packaging>
 
     <name>Courses JDBC Demo</name>
-    <description>Образовательная платформа — JDBC + PostgreSQL + JavaFX</description>
+    <description>Образовательная платформа — Hibernate + PostgreSQL + JavaFX</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hibernate.version>7.0.0.Final</hibernate.version>
         <postgresql.version>42.7.5</postgresql.version>
         <hikaricp.version>6.2.1</hikaricp.version>
         <slf4j.version>2.0.16</slf4j.version>
@@ -25,15 +26,23 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-hikaricp</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>${hikaricp.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -44,6 +53,7 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -80,7 +90,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
-                    <mainClass>MainApp</mainClass>
+                    <mainClass>app.MainApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>

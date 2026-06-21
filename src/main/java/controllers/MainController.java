@@ -10,9 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import service.BusinessQueryService;
 import service.CrudDemoService;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.sql.SQLException;
 import java.util.Map;
 
 public class MainController {
@@ -125,45 +122,27 @@ public class MainController {
                 try {
                     switch (op[0]) {
                         case "Create Demo":
-                            result = executeWithOutput(() -> {
-                                try { crud.demoCreate(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result = crud.demoCreate();
                             result += "\n\n--- ТЕКУЩЕЕ СОСТОЯНИЕ БАЗЫ ДАННЫХ ---\n";
-                            result += executeWithOutput(() -> {
-                                try { crud.demoRead(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result += crud.demoRead();
                             break;
                         case "Read All":
-                            result = executeWithOutput(() -> {
-                                try { crud.demoRead(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result = crud.demoRead();
                             break;
                         case "Update Email (id=1)":
-                            result = executeWithOutput(() -> {
-                                try { crud.demoUpdate(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result = crud.demoUpdate();
                             result += "\n\n--- ТЕКУЩЕЕ СОСТОЯНИЕ БАЗЫ ДАННЫХ ---\n";
-                            result += executeWithOutput(() -> {
-                                try { crud.demoRead(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result += crud.demoRead();
                             break;
                         case "Delete Temp User":
-                            result = executeWithOutput(() -> {
-                                try { crud.demoDelete(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result = crud.demoDelete();
                             result += "\n\n--- ТЕКУЩЕЕ СОСТОЯНИЕ БАЗЫ ДАННЫХ ---\n";
-                            result += executeWithOutput(() -> {
-                                try { crud.demoRead(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result += crud.demoRead();
                             break;
                         case "Transaction (certificate)":
-                            result = executeWithOutput(() -> {
-                                try { crud.demoTransaction(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result = crud.demoTransaction();
                             result += "\n\n--- ТЕКУЩЕЕ СОСТОЯНИЕ БАЗЫ ДАННЫХ ---\n";
-                            result += executeWithOutput(() -> {
-                                try { crud.demoRead(); } catch (SQLException ex) { throw new RuntimeException(ex); }
-                            });
+                            result += crud.demoRead();
                             break;
                         default:
                             result = "Неизвестная операция";
@@ -182,22 +161,6 @@ public class MainController {
             sqlDisplay.clear();
         });
         leftBox.getChildren().add(clearBtn);
-    }
-
-    private String executeWithOutput(Runnable action) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PrintStream ps = new PrintStream(baos);
-        PrintStream oldOut = System.out;
-        try {
-            System.setOut(ps);
-            action.run();
-            System.out.flush();
-            return baos.toString();
-        } catch (Exception e) {
-            return "Ошибка: " + e.getMessage();
-        } finally {
-            System.setOut(oldOut);
-        }
     }
 
     private void buildBizPanel() {
@@ -222,7 +185,6 @@ public class MainController {
         VBox.setVgrow(main, Priority.ALWAYS);
 
         dynamicTable = new TableView<>();
-        dynamicTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         rightContent.getChildren().add(dynamicTable);
         filterBox = new HBox(10);
         filterBox.setVisible(false);
@@ -246,9 +208,7 @@ public class MainController {
         leftMenu.getChildren().addAll(btns);
         leftMenu.getChildren().add(new Separator());
         Button refreshAll = new Button("Обновить все данные");
-        refreshAll.setOnAction(e -> {
-            loadInitialBizData();
-        });
+        refreshAll.setOnAction(e -> loadInitialBizData());
         leftMenu.getChildren().add(refreshAll);
     }
 
@@ -271,7 +231,7 @@ public class MainController {
         TableColumn<Map<String, Object>, String> col1 = new TableColumn<>("Курс");
         TableColumn<Map<String, Object>, Number> col2 = new TableColumn<>("Студентов");
         col1.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("course")));
-        col2.setCellValueFactory(cell -> new SimpleIntegerProperty((Integer) cell.getValue().get("students")));
+        col2.setCellValueFactory(cell -> new SimpleIntegerProperty(((Number) cell.getValue().get("students")).intValue()));
         dynamicTable.getColumns().addAll(col1, col2);
         dynamicTable.setItems(originalStudentCountList);
     }
@@ -287,14 +247,14 @@ public class MainController {
         apply.setOnAction(e -> {
             int min = minSpinner.getValue();
             dynamicTable.setItems(new FilteredList<>(originalTopTeachersList,
-                    row -> ((Integer) row.get("students")) >= min));
+                    row -> ((Number) row.get("students")).intValue() >= min));
         });
         reset.setOnAction(e -> { minSpinner.getValueFactory().setValue(0); dynamicTable.setItems(originalTopTeachersList); });
         dynamicTable.getColumns().clear();
         TableColumn<Map<String, Object>, String> col1 = new TableColumn<>("Преподаватель");
         TableColumn<Map<String, Object>, Number> col2 = new TableColumn<>("Студентов");
         col1.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("teacher")));
-        col2.setCellValueFactory(cell -> new SimpleIntegerProperty((Integer) cell.getValue().get("students")));
+        col2.setCellValueFactory(cell -> new SimpleIntegerProperty(((Number) cell.getValue().get("students")).intValue()));
         dynamicTable.getColumns().addAll(col1, col2);
         dynamicTable.setItems(originalTopTeachersList);
     }
@@ -343,8 +303,8 @@ public class MainController {
         TableColumn<Map<String, Object>, Number> col2 = new TableColumn<>("Курсов начато");
         TableColumn<Map<String, Object>, Number> col3 = new TableColumn<>("Завершено");
         col1.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("name")));
-        col2.setCellValueFactory(cell -> new SimpleIntegerProperty((Integer) cell.getValue().get("courses_started")));
-        col3.setCellValueFactory(cell -> new SimpleIntegerProperty((Integer) cell.getValue().get("completed")));
+        col2.setCellValueFactory(cell -> new SimpleIntegerProperty(((Number) cell.getValue().get("courses_started")).intValue()));
+        col3.setCellValueFactory(cell -> new SimpleIntegerProperty(((Number) cell.getValue().get("completed")).intValue()));
         dynamicTable.getColumns().addAll(col1, col2, col3);
         dynamicTable.setItems(originalUserList);
     }
@@ -352,19 +312,20 @@ public class MainController {
     private void showCourseTeacher() {
         filterBox.setVisible(false);
         try {
+            dynamicTable.setItems(biz.getCourseTeacherListData());
             dynamicTable.getColumns().clear();
             TableColumn<Map<String, Object>, String> col1 = new TableColumn<>("Курс");
             TableColumn<Map<String, Object>, String> col2 = new TableColumn<>("Преподаватель");
             col1.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("course")));
             col2.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("teacher")));
             dynamicTable.getColumns().addAll(col1, col2);
-            dynamicTable.setItems(biz.getCourseTeacherListData());
-        } catch (SQLException ex) { showError("Ошибка: " + ex.getMessage()); }
+        } catch (Exception ex) { showError("Ошибка: " + ex.getMessage()); }
     }
 
     private void showHierarchy() {
         filterBox.setVisible(false);
         try {
+            dynamicTable.setItems(biz.getCourseModuleLessonListData());
             dynamicTable.getColumns().clear();
             TableColumn<Map<String, Object>, String> col1 = new TableColumn<>("Курс");
             TableColumn<Map<String, Object>, String> col2 = new TableColumn<>("Модуль");
@@ -373,13 +334,13 @@ public class MainController {
             col2.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("module")));
             col3.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("lesson")));
             dynamicTable.getColumns().addAll(col1, col2, col3);
-            dynamicTable.setItems(biz.getCourseModuleLessonListData());
-        } catch (SQLException ex) { showError("Ошибка: " + ex.getMessage()); }
+        } catch (Exception ex) { showError("Ошибка: " + ex.getMessage()); }
     }
 
     private void showStudentProgress() {
         filterBox.setVisible(false);
         try {
+            dynamicTable.setItems(biz.getStudentCourseTeacherProgressData());
             dynamicTable.getColumns().clear();
             TableColumn<Map<String, Object>, String> col1 = new TableColumn<>("Студент");
             TableColumn<Map<String, Object>, String> col2 = new TableColumn<>("Курс");
@@ -390,8 +351,7 @@ public class MainController {
             col3.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("teacher")));
             col4.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("progress_status")));
             dynamicTable.getColumns().addAll(col1, col2, col3, col4);
-            dynamicTable.setItems(biz.getStudentCourseTeacherProgressData());
-        } catch (SQLException ex) { showError("Ошибка: " + ex.getMessage()); }
+        } catch (Exception ex) { showError("Ошибка: " + ex.getMessage()); }
     }
 
     private void showCourseProgress() {
@@ -404,7 +364,7 @@ public class MainController {
                 public String toString(Map<String, Object> c) { return c != null ? (String) c.get("course") : ""; }
                 public Map<String, Object> fromString(String s) { return null; }
             });
-        } catch (SQLException ex) { showError("Ошибка загрузки курсов"); }
+        } catch (Exception ex) { showError("Ошибка загрузки курсов"); }
         Button showBtn = new Button("Показать прогресс");
         filterBox.getChildren().addAll(new Label("Курс:"), courseCombo, showBtn);
         showBtn.setOnAction(e -> {
@@ -412,15 +372,14 @@ public class MainController {
             if (selected == null) { showError("Выберите курс"); return; }
             try {
                 int courseId = (int) selected.get("course_id");
-                ObservableList<Map<String, Object>> data = biz.getCourseProgressDetailsData(courseId);
+                dynamicTable.setItems(biz.getCourseProgressDetailsData(courseId));
                 dynamicTable.getColumns().clear();
                 TableColumn<Map<String, Object>, String> col1 = new TableColumn<>("Студент");
                 TableColumn<Map<String, Object>, String> col2 = new TableColumn<>("Статус");
                 col1.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("student")));
                 col2.setCellValueFactory(cell -> new SimpleStringProperty((String) cell.getValue().get("status")));
                 dynamicTable.getColumns().addAll(col1, col2);
-                dynamicTable.setItems(data);
-            } catch (SQLException ex) { showError("Ошибка: " + ex.getMessage()); }
+            } catch (Exception ex) { showError("Ошибка: " + ex.getMessage()); }
         });
     }
 
@@ -430,7 +389,7 @@ public class MainController {
             originalTopTeachersList = biz.getTopTeachersData();
             originalCertList = biz.getIssuedCertificatesData();
             originalUserList = biz.getUserActivityData();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             showError("Ошибка загрузки данных: " + e.getMessage());
         }
     }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence
+                                 https://jakarta.ee/xml/ns/persistence/persistence_3_2.xsd"
+             version="3.2">
+
+    <persistence-unit name="courses-pu" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <class>model.User</class>
+        <class>model.Teacher</class>
+        <class>model.Student</class>
+        <class>model.Course</class>
+        <class>model.CourseModule</class>
+        <class>model.Lesson</class>
+        <class>model.Test</class>
+        <class>model.CourseProgress</class>
+        <class>model.LessonProgress</class>
+        <class>model.Sert</class>
+
+        <properties>
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:postgresql://localhost:5432/courses"/>
+            <property name="jakarta.persistence.jdbc.user"     value="postgres"/>
+            <property name="jakarta.persistence.jdbc.password"  value="postgres"/>
+            <property name="jakarta.persistence.jdbc.driver"
+                      value="org.postgresql.Driver"/>
+
+            <property name="hibernate.connection.provider_class"
+                      value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
+            <property name="hibernate.hikari.maximumPoolSize"  value="10"/>
+            <property name="hibernate.hikari.minimumIdle"      value="2"/>
+
+            <property name="hibernate.hbm2ddl.auto"           value="validate"/>
+            <property name="hibernate.dialect"
+                      value="org.hibernate.dialect.PostgreSQLDialect"/>
+
+            <property name="hibernate.show_sql"                value="true"/>
+            <property name="hibernate.format_sql"              value="true"/>
+            <property name="hibernate.highlight_sql"           value="true"/>
+            <property name="hibernate.use_sql_comments"        value="true"/>
+
+            <property name="hibernate.jdbc.batch_size"         value="25"/>
+            <property name="hibernate.order_inserts"           value="true"/>
+            <property name="hibernate.order_updates"           value="true"/>
+
+            <property name="hibernate.connection.charSet"      value="UTF-8"/>
+        </properties>
+    </persistence-unit>
+</persistence>

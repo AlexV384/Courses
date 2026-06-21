@@ -1,22 +1,23 @@
 package app;
 
-import db.ConnectionManager;
-import db.SchemaInitializer;
+import db.HibernateUtil;
+import db.DataSeeder;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import java.sql.SQLException;
 
 public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         try {
-            SchemaInitializer.initialize();
-        } catch (SQLException e) {
+            HibernateUtil.getEntityManagerFactory();
+            DataSeeder.seed();
+        } catch (Exception e) {
             System.err.println("Ошибка инициализации БД: " + e.getMessage());
+            e.printStackTrace();
             return;
         }
 
@@ -31,7 +32,7 @@ public class MainApp extends Application {
 
     @Override
     public void stop() {
-        ConnectionManager.close();
+        HibernateUtil.close();
         System.out.println("Программа завершена.");
     }
 

@@ -1,101 +1,114 @@
 package service;
 
-import dao.*;
+import repository.*;
 import model.*;
-import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class CrudDemoService {
-    private final UserDao userDao = new UserDao();
-    private final TeacherDao teacherDao = new TeacherDao();
-    private final StudentDao studentDao = new StudentDao();
-    private final CourseDao courseDao = new CourseDao();
-    private final ModuleDao moduleDao = new ModuleDao();
-    private final LessonDao lessonDao = new LessonDao();
-    private final TestDao testDao = new TestDao();
-    private final CourseProgressDao progressDao = new CourseProgressDao();
-    private final SertDao sertDao = new SertDao();
+    private final UserRepository userRepo = new UserRepository();
+    private final TeacherRepository teacherRepo = new TeacherRepository();
+    private final CourseRepository courseRepo = new CourseRepository();
+    private final ModuleRepository moduleRepo = new ModuleRepository();
+    private final LessonRepository lessonRepo = new LessonRepository();
+    private final TestRepository testRepo = new TestRepository();
+    private final CourseProgressRepository progressRepo = new CourseProgressRepository();
+    private final SertRepository sertRepo = new SertRepository();
 
-    public void demoCreate() throws SQLException {
-        System.out.println("CREATE");
+    public String demoCreate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE\n");
         User user = new User("Демо Пользователь", "demo@courses.ru", "hash123", OffsetDateTime.now());
-        int userId = userDao.insert(user);
-        System.out.printf("Создан пользователь: id=%d, %s%n", userId, user.getName());
+        userRepo.save(user);
+        sb.append(String.format("Создан пользователь: id=%d, %s\n", user.getId(), user.getName()));
 
-        Teacher teacher = new Teacher(userId, "Демо Преподаватель", "teacher@courses.ru", "hash", OffsetDateTime.now());
-        int teacherId = teacherDao.insert(teacher);
-        System.out.printf("Создан преподаватель: id=%d, %s%n", teacherId, teacher.getName());
+        Teacher teacher = new Teacher(user, "Демо Преподаватель", "teacher@courses.ru", "hash", OffsetDateTime.now());
+        teacherRepo.save(teacher);
+        sb.append(String.format("Создан преподаватель: id=%d, %s\n", teacher.getTeacherId(), teacher.getName()));
 
-        Course course = new Course(teacherId, "Java JDBC", "Учимся работать с БД из Java", "6 недель");
-        int courseId = courseDao.insert(course);
-        System.out.printf("Создан курс: id=%d, %s%n", courseId, course.getName());
+        Course course = new Course(teacher, "Java JDBC", "Учимся работать с БД из Java", "6 недель");
+        courseRepo.save(course);
+        sb.append(String.format("Создан курс: id=%d, %s\n", course.getId(), course.getName()));
 
-        CourseModule module = new CourseModule(courseId, "Основы JDBC", "Connection, Statement, ResultSet");
-        int moduleId = moduleDao.insert(module);
-        System.out.printf("Создан модуль: id=%d, %s%n", moduleId, module.getName());
+        CourseModule module = new CourseModule(course, "Основы JDBC", "Connection, Statement, ResultSet");
+        moduleRepo.save(module);
+        sb.append(String.format("Создан модуль: id=%d, %s\n", module.getId(), module.getName()));
 
-        Lesson lesson = new Lesson(moduleId, "Первый урок", "Практика работы с JDBC");
-        int lessonId = lessonDao.insert(lesson);
-        System.out.printf("Создан урок: id=%d, %s%n", lessonId, lesson.getName());
+        Lesson lesson = new Lesson(module, "Первый урок", "Практика работы с JDBC");
+        lessonRepo.save(lesson);
+        sb.append(String.format("Создан урок: id=%d, %s\n", lesson.getId(), lesson.getName()));
 
-        Test test = new Test(lessonId, "Тест к уроку");
-        int testId = testDao.insert(test);
-        System.out.printf("Создан тест: id=%d, %s%n", testId, test.getName());
+        Test test = new Test(lesson, "Тест к уроку");
+        testRepo.save(test);
+        sb.append(String.format("Создан тест: id=%d, %s\n", test.getId(), test.getName()));
 
-        System.out.println();
+        sb.append("\n");
+        return sb.toString();
     }
 
-    public void demoRead() throws SQLException {
-        System.out.println("READ");
-        System.out.println("Все курсы:");
-        for (Course c : courseDao.findAll()) {
-            System.out.printf("%d | %s | teacherId=%d%n", c.getId(), c.getName(), c.getTeacherId());
+    public String demoRead() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("READ\n");
+        sb.append("Все курсы:\n");
+
+        List<Course> courses = courseRepo.findAll();
+        Collections.sort(courses, Comparator.comparingInt(Course::getId));
+        for (Course c : courses) {
+            sb.append(String.format("%d | %s | teacherId=%d\n", c.getId(), c.getName(),
+                    c.getTeacher() != null ? c.getTeacher().getTeacherId() : null));
         }
 
-        System.out.println("\nВсе пользователи:");
-        for (User u : userDao.findAll()) {
-            System.out.printf("%d | %s | %s%n", u.getId(), u.getName(), u.getEmail());
+        sb.append("\nВсе пользователи:\n");
+        List<User> users = userRepo.findAll();
+        Collections.sort(users, Comparator.comparingInt(User::getId));
+        for (User u : users) {
+            sb.append(String.format("%d | %s | %s\n", u.getId(), u.getName(), u.getEmail()));
         }
-        System.out.println();
+        sb.append("\n");
+        return sb.toString();
     }
 
-    public void demoUpdate() throws SQLException {
-        System.out.println("UPDATE");
-        userDao.findById(1).ifPresent(u -> {
+    public String demoUpdate() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE\n");
+        userRepo.findById(1).ifPresent(u -> {
             String oldEmail = u.getEmail();
             u.setEmail("updated_" + oldEmail);
-            try {
-                boolean ok = userDao.update(u);
-                System.out.printf("Email пользователя id=1 обновлён: %s → %s (успех=%b)%n",
-                        oldEmail, u.getEmail(), ok);
-            } catch (SQLException e) {
-                System.err.println("Ошибка обновления: " + e.getMessage());
-            }
+            userRepo.update(u);
+            sb.append(String.format("Email пользователя id=1 обновлён: %s → %s\n", oldEmail, u.getEmail()));
         });
-        System.out.println();
+        sb.append("\n");
+        return sb.toString();
     }
 
-    public void demoDelete() throws SQLException {
-        System.out.println("DELETE");
+    public String demoDelete() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DELETE\n");
         User temp = new User("Temp", "temp@del.ru", "hash", OffsetDateTime.now());
-        int id = userDao.insert(temp);
-        System.out.printf("Создан временный пользователь id=%d%n", id);
+        userRepo.save(temp);
+        sb.append(String.format("Создан временный пользователь id=%d\n", temp.getId()));
 
-        boolean deleted = userDao.delete(id);
-        System.out.printf("Удалён пользователь id=%d (успех=%b)%n", id, deleted);
+        boolean deleted = userRepo.deleteById(temp.getId());
+        sb.append(String.format("Удалён пользователь id=%d (успех=%b)\n", temp.getId(), deleted));
 
-        boolean notExists = userDao.delete(99999);
-        System.out.printf("Удаление несуществующего id=99999 (успех=%b)%n", notExists);
-        System.out.println();
+        boolean notExists = userRepo.deleteById(99999);
+        sb.append(String.format("Удаление несуществующего id=99999 (успех=%b)\n", notExists));
+        sb.append("\n");
+        return sb.toString();
     }
 
-    public void demoTransaction() throws SQLException {
-        System.out.println("Транзакция: выдача сертификата");
+    public String demoTransaction() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Транзакция: выдача сертификата\n");
         try {
-            sertDao.issueCertificateIfCompleted(4, 1);
-        } catch (SQLException e) {
-            System.out.println("Ошибка (ожидаемо): " + e.getMessage());
+            sertRepo.issueCertificateIfCompleted(4, 1);
+            sb.append("Сертификат успешно выдан\n");
+        } catch (Exception e) {
+            sb.append("Ошибка (ожидаемо): ").append(e.getMessage()).append("\n");
         }
-        System.out.println();
+        sb.append("\n");
+        return sb.toString();
     }
 }
