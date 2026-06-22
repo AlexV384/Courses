@@ -17,7 +17,6 @@ public class SertRepository extends GenericRepository<Sert, Integer> {
         try {
             tx.begin();
 
-            // Проверяем прогресс с блокировкой
             Long count = em.createQuery(
                             "SELECT COUNT(cp) FROM CourseProgress cp " +
                                     "WHERE cp.user.id = :userId AND cp.course.id = :courseId AND cp.progress = 'completed'",
@@ -31,7 +30,6 @@ public class SertRepository extends GenericRepository<Sert, Integer> {
                 throw new IllegalStateException("Студент не завершил курс, сертификат не выдан");
             }
 
-            // Проверяем, нет ли уже сертификата
             Long existing = em.createQuery(
                             "SELECT COUNT(s) FROM Sert s WHERE s.user.id = :userId AND s.course.id = :courseId",
                             Long.class)
